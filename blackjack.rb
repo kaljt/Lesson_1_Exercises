@@ -47,7 +47,7 @@ end
 
 def calculate_hand(hand)
   value = 0
-  puts hand
+  #puts hand
     hand.each do |count|
       value += count[0] if count[0].class == Fixnum
       value +=10 if count.include?("QUEEN")
@@ -67,18 +67,22 @@ def calculate_hand(hand)
 
 end
 
-def game_over(total)
+def player_bust(total)
   if total == 21
-    status = "Blackjack!"
+    status = "Blackjack"
+  elsif total > 21
+    status = "Bust"
+
   end
     
 
 end
 
-
-def deal_card(card)
-  #get unique key,value pair from deck
-
+def print_player_hand(player_hand)
+    p "player hand is " #+ player_hand[0].to_s + "of" + player_hand[1].to_s + "with a total of #{player_total}"
+    player_hand.each do |value,suit|
+    p "#{value} of #{suit}"
+  end
 
 end
 
@@ -88,11 +92,13 @@ end
 
 def black_jack(p_total,c_total)
   if p_total == 21
-    puts "Player wins!"
-    exit
+    puts "Player Wins!"
+    winner = 'Player'
+    
   elsif c_total == 21
-    puts "Dealer wins!"
-    exit
+    puts "Dealer wins! with #{c_total}"
+    winner = 'Dealer'
+    
   end
 end
 
@@ -106,53 +112,88 @@ end
     #QUEEN = 10
     #KING = 10
     #my_deck = Hash.new
+    player_status = ' '
+    while player_status != 'n' do
     card_count = 0
     my_deck = initialize_deck(my_deck)
     player_hand = []
     computer_hand = []
-    player_status = ' '
-    while player_status != 'n' do
+    game_over = false
+
+    while !game_over do
+
     player_hand = player_hand.push(draw_card(my_deck))
-    #computer_card = draw_card(my_deck)
     computer_hand = computer_hand.push(draw_card(my_deck))
     player_hand = player_hand.push(draw_card(my_deck))
     player_total = calculate_hand(player_hand)
     computer_hand = computer_hand.push(draw_card(my_deck))
     computer_total = calculate_hand(computer_hand)
-   p "player hand is " + "#{player_hand} " + "with a total of #{player_total}"
-   p "computer hand is " + "#{computer_hand.first}"
-   black_jack(player_total,computer_total)
-   
-   puts "Hit(h) or Stand(s): "
-   player_action = gets.chomp.downcase
-    if player_action == 'h'
-    player_hand = player_hand.push(draw_card(my_deck))
-     player_total = calculate_hand(player_hand)
-    p player_total
-    elsif player_action == 's'
+    print_player_hand(player_hand)
+    #p "player hand is " #+ player_hand[0].to_s + "of" + player_hand[1].to_s + "with a total of #{player_total}"
+    #player_hand.each do |value,suit|
+    #p "#{value} of #{suit}"
+  
+    p "computer hand is " #+ "#{computer_hand.first} " + " and face down card"
+    p computer_hand[0][0].to_s + " of " + computer_hand[0][1].to_s
+    
+    winner = black_jack(player_total,computer_total)
+    if winner == 'Player'  || winner == 'Dealer'
+      game_over = true
+      break
+    end
+
+      loop do
+      puts "Hit(h) or Stand(s): "
+      player_action = gets.chomp.downcase
+      if player_action == 'h'
+      player_hand = player_hand.push(draw_card(my_deck))
+      player_total = calculate_hand(player_hand)
+      status = player_bust(player_total)
+      #p "player hand is " + "#{player_hand.flatten}"  + "with a total of #{player_total}"
+      print_player_hand(player_hand)
+      if status == 'Bust'
+        game_over = true
+        break
+      end
+      end
+      break if player_action == 's'
+      end
+
+
+      #binding.pry
+      if player_total > 21
+        puts "Player busted with "
+        puts print_player_hand(player_hand)
+        break
+      else
+        puts "computer hand is "
+        puts print_player_hand(computer_hand)
       while calculate_hand(computer_hand) < 17 do  
           computer_hand = computer_hand.push(draw_card(my_deck))
+          computer_total = calculate_hand(computer_hand)
       end
-    p "Computer hand is #{computer_hand}"
+      end
+      if player_bust(computer_total) == 'Bust'
+        puts "Dealer busted with "
+        puts print_player_hand(computer_hand)
+        p "#{computer_total}, Player wins!"
+        game_over = true
+      elsif player_total > computer_total
+        puts "Player wins with "
+        puts print_player_hand(player_hand)
+        p "with #{player total} over #{computer_total}"
+        game_over = true
+      elsif player_total == computer_total
+        puts "Player ties with dealer!"
+        game_over = true
+      elsif player_bust(computer_total)  == 'Blackjack'  || player_total < computer_total
+        puts "Dealer wins with #{computer_total}"
+        game_over = true
+      end
+      end
+    #p "Computer hand is #{computer_hand}"
     puts "Do you want to play again? (y/n): "
     player_status = gets.chomp.downcase
   end
-end
-   # p player_card
-    #p computer_card
-    #p my_deck
-    #player_hand = player_card.push(draw_card(my_deck))
-    #p player_card
-    #p player_hand
-    #hile card_count <= COUNT do 
-    #     test = draw_card(my_deck)
-    #     card_count +=1
-    #     
-    #   end
-    #   puts "#{my_deck}"
-    #   #puts test
 
-    #Randomly pick a value between 1 and ACE
-    #randomly pick a suit
-    #check if card already exists in deck
-    #if not then deal it
+  
